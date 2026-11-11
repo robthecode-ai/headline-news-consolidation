@@ -1,13 +1,13 @@
 ## Public repository
 
-https://github.com/robthecode-ai/headline-news-center
+https://github.com/robthecode-ai/headline-news-consolidation
 
 # Headline News Center
 
 A Django news application where Readers follow news, Journalists write
 articles, and Editors manage publishers and approve articles.
 
-## Requirements
+## Requirements for virtual environment setup
 
 - Python 3.13
 - Git
@@ -15,15 +15,15 @@ articles, and Editors manage publishers and approve articles.
 
 These instructions use Windows PowerShell.
 
-## Setup
+## Setup with a virtual environment
 
 ### 1. Download the project
 
 Open PowerShell in the folder where you want to download the project:
 
 ```powershell
-git clone https://github.com/robthecode-ai/headline-news-center.git
-cd headline-news-center
+git clone https://github.com/robthecode-ai/headline-news-consolidation.git
+cd headline-news-consolidation
 ```
 
 Run the remaining commands from this folder, which contains manage.py.
@@ -122,6 +122,74 @@ To start it again later, open PowerShell in the project folder and run:
 .\.venv\Scripts\Activate.ps1
 python manage.py runserver
 ```
+
+## Run with Docker Compose
+
+Install Docker with Docker Compose. On Windows, open Docker Desktop
+and wait until its engine is running.
+
+Download the project using the instructions above. Open a terminal in
+the project root, which contains compose.yaml.
+
+### Configure Docker settings
+
+On first setup, copy .env.example to .env. If .env already exists,
+open it to update the required values.
+
+Generate a random value with this command:
+
+```powershell
+docker run --rm python:3.13-slim python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Run it three times. Put a different generated value into each of these
+settings in your private .env file:
+
+```ini
+DJANGO_SECRET_KEY='your-first-generated-value'
+DOCKER_DB_PASSWORD='your-second-generated-value'
+DOCKER_DB_ROOT_PASSWORD='your-third-generated-value'
+```
+
+Keep the remaining settings from .env.example. Keep real secrets in
+.env and placeholder values in .env.example.
+
+### Build and start
+
+```powershell
+docker compose up --build
+```
+
+Compose starts MariaDB, waits for its health check, applies Django
+migrations, creates the application role groups, and starts Django's
+development server.
+
+Open http://127.0.0.1:8000/ and register an account.
+
+Press Ctrl+C in the terminal to stop both services. Start them again
+with:
+
+```powershell
+docker compose up
+```
+
+Named Docker volumes preserve database records and uploaded images
+across container recreation. A fresh installation starts with an empty
+application database.
+
+## Sphinx documentation
+
+Open docs/_build/html/index.html in a browser to read the generated
+documentation.
+
+With the project's virtual environment dependencies installed and .env
+configured, rebuild the documentation from the project root:
+
+```powershell
+.\.venv\Scripts\sphinx-build.exe -M html docs docs/_build -W
+```
+
+The generated HTML is stored in docs/_build/html.
 
 ## Using the app
 
