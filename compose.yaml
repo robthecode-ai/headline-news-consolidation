@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: news_db
+      MARIADB_USER: news_user
+      MARIADB_PASSWORD: ${DOCKER_DB_PASSWORD:?Required in .env}
+      MARIADB_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASSWORD:?Required in .env}
+    volumes:
+      - database_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  web:
+    build: .
+    image: headline-news:local
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Required in .env}
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      NEWS_DB_NAME: news_db
+      NEWS_DB_USER: news_user
+      NEWS_DB_PASSWORD: ${DOCKER_DB_PASSWORD:?Required in .env}
+      NEWS_DB_HOST: db
+      NEWS_DB_PORT: "3306"
+      NEWS_SITE_URL: http://127.0.0.1:8000
+      NEWS_FROM_EMAIL: ${NEWS_FROM_EMAIL:-news@example.com}
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py migrate &&
+        python manage.py setup_groups &&
+        exec python manage.py runserver 0.0.0.0:8000 --noreload
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - media_data:/app/media
+
+volumes:
+  database_data:
+  media_data:
