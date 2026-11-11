@@ -1,3 +1,5 @@
+"""Models for accounts, publishers, articles, newsletters, and logs."""
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.auth.models import Group
@@ -37,7 +39,12 @@ class User(AbstractUser):
     )
 
     def save(self, *args, **kwargs):
-        """Save the user and synchronise their role group."""
+        """Save the account and synchronise its role group.
+
+        Strip surrounding whitespace from the email and convert it to
+        lowercase. Remove reader subscriptions if the account's role
+        is no longer reader.
+        """
 
         self.email = self.email.strip().lower()
 
@@ -92,7 +99,7 @@ class Publisher(models.Model):
 
 
 class Article(models.Model):
-    """Represent a news story submitted for editorial approval."""
+    """Represent a news article with an optional publisher."""
 
     title = models.CharField(max_length=200)
     content = models.TextField()
