@@ -1,8 +1,14 @@
+"""Queries that limit article and newsletter access by user role."""
+
 from .models import Article, Newsletter
 
 
 def editable_articles(user):
-    """Return articles the user is permitted to manage."""
+    """Return articles the user is allowed to manage.
+
+    Editors receive articles belonging to their publishers. Journalists
+    receive their own articles. Other users receive an empty queryset.
+    """
     if user.groups.filter(name="Editor").exists():
         return Article.objects.filter(
             publisher__editors=user,
@@ -28,7 +34,11 @@ def editable_newsletters(user):
 
 
 def visible_articles(user):
-    """Return published articles within the user's browsing scope."""
+    """Return approved articles within the user's browsing scope.
+
+    Authenticated editors receive articles belonging to their publishers.
+    Other users receive all approved articles.
+    """
     articles = Article.objects.filter(approved=True)
 
     if (
