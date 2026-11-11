@@ -1,3 +1,5 @@
+"""Services for publishing, approval logging, and subscriber emails."""
+
 import logging
 from smtplib import SMTPException
 
@@ -15,7 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 def log_approved_article(article, editor):
-    """POST an approved article to our authenticated logging endpoint."""
+    """Send an approved article to the API using the supplied account.
+
+    Create or reuse the account's authentication token. Raise
+    requests.RequestException if the request fails or the API returns
+    a status other than 200 or 201.
+    """
     token, _ = Token.objects.get_or_create(user=editor)
 
     response = requests.post(
@@ -80,7 +87,11 @@ def email_article_subscribers(article):
 
 
 def publish_article(article, editor):
-    """Approve an article and attempt its outstanding delivery steps."""
+    """Approve an article and attempt API logging and subscriber emails.
+
+    When retrying an approved article, skip steps already marked as
+    successful. Return a list of error messages for failed delivery steps.
+    """
     if not article.approved:
         article.approved = True
         article.email_sent = False
