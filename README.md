@@ -283,4 +283,17 @@ Tests use a separate database. Your database account needs permission to
 create and remove it. Tests capture emails and mock publication HTTP
 requests, so the development server does not need to be running.
 
+## Docker verification
+
+Docker Compose was tested on Windows with Docker Desktop and in a fresh
+GitHub Codespace.
+
+Local testing covered publisher team setup, article submission and
+approval, reader subscriptions, image uploads, and publication
+notifications. Accounts, articles, and images survived container
+recreation.
+
+Codespaces testing covered registration, independent article publishing,
+image display, and logging out and back in.
+
 This project is configured for local development.
